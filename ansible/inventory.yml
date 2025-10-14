@@ -1,0 +1,11 @@
+all:
+  hosts:
+    yandex-devops:
+      ansible_host: 158.160.146.35
+      ansible_user: serega_admin
+      ansible_ssh_private_key_file: ~/.ssh/yandex_devops
+
+  children:
+    kubernetes:
+      hosts:
+        yandex-devops:

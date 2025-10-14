@@ -1,0 +1,20 @@
+# Docker configuration
+docker_version: "24.0"
+docker_users:
+  - "{{ ansible_user }}"
+
+# Kubernetes configuration
+k8s_tools:
+  - kubectl
+  - kubelet
+  - kubeadm
+
+# Firewall rules
+firewall_allowed_ports:
+  - 22    # SSH
+  - 80    # HTTP
+  - 443   # HTTPS
+  - 3000  # Frontend
+  - 8080  # Backend
+  - 9090  # Prometheus
+  - 3001  # Grafana
