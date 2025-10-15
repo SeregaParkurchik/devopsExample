@@ -1,13 +1,17 @@
+version: '3.8'
 services:
   frontend-next:
     build: ./frontend-next
+    image: ghcr.io/seregaparkurchik/frontend-next:latest  # ← lowercase!
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - BACKEND_URL=http://backend-go:8080
 
   backend-go:
     build: ./backend-go
+    image: ghcr.io/seregaparkurchik/backend-go:latest  # ← lowercase!
     ports:
       - "8080:8080"
     environment:
@@ -16,7 +20,7 @@ services:
   cache-redis:
     image: redis:7-alpine
     ports:
-      - "6380:6379"  # Изменил порт чтобы не конфликтовал
+      - "6380:6379"
 
   database:
     image: postgres:15-alpine
@@ -25,4 +29,4 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=blog_platform
     ports:
-      - "5433:5432"  
+      - "5433:5432"

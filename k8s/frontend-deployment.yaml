@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-next
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend-next
+  template:
+    metadata:
+      labels:
+        app: frontend-next
+    spec:
+      containers:
+      - name: frontend-next
+        image: your-registry/frontend-next:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: BACKEND_URL
+          value: "http://backend-service:8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend-next
+  ports:
+  - port: 80
+    targetPort: 3000
