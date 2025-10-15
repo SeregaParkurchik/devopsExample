@@ -14,12 +14,31 @@ spec:
     spec:
       containers:
       - name: frontend-next
-        image: your-registry/frontend-next:latest
+        image: ghcr.io/seregaparkurchik/devopsexample-frontend:latest
         ports:
         - containerPort: 3000
         env:
         - name: BACKEND_URL
           value: "http://backend-service:8080"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
