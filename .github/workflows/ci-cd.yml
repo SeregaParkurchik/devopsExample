@@ -113,4 +113,4 @@ jobs:
           echo "1. Configure Kubernetes to pull from ghcr.io"
           echo "2. Update k8s deployments with new image names"
           echo "3. Set up auto-deployment to cluster"
-
+#
