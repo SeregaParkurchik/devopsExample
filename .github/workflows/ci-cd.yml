@@ -9,62 +9,42 @@ env:
   YC_REGISTRY_ID: crpc7r4jjthonh572883
 
 jobs:
-  test-backend-go:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-      - name: Build Go binary
-        run: |
-          cd backend-go
-          go build -o app .
-
-  test-frontend-next:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      - name: Build Frontend
-        run: |
-          cd frontend-next
-          npm ci
-          npm run build
-
   build-and-push-to-yandex:
-    runs-on: ubuntu-latest
-    needs: [test-backend-go, test-frontend-next]
+    runs-on: ubuntu-latest  # ← Используем AMD64 runner!
     steps:
       - uses: actions/checkout@v4
       
-      - name: Create JSON key file
-        run: |
-          echo '${{ secrets.YC_DOCKER_PASSWORD }}' > key.json
-          cat key.json | jq . 2>/dev/null && echo "✅ JSON valid" || echo "❌ JSON invalid"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64  # ← Собираем для AMD64!
       
       - name: Log in to Yandex Container Registry
         run: |
-          cat key.json | docker login \
-            --username json_key \
+          echo '${{ secrets.YC_OAUTH_TOKEN }}' | docker login \
+            --username oauth \
             --password-stdin \
             cr.yandex
       
-      - name: Build and push Backend
-        run: |
-          cd backend-go
-          docker build -t cr.yandex/${{ env.YC_REGISTRY_ID }}/backend-go:${{ github.sha }} .
-          docker push cr.yandex/${{ env.YC_REGISTRY_ID }}/backend-go:${{ github.sha }}
+      - name: Build and push Backend for AMD64
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend-go
+          platforms: linux/amd64
+          push: true
+          tags: |
+            cr.yandex/${{ env.YC_REGISTRY_ID }}/backend-go:${{ github.sha }}
+            cr.yandex/${{ env.YC_REGISTRY_ID }}/backend-go:latest
       
-      - name: Build and push Frontend
-        run: |
-          cd frontend-next
-          docker build -t cr.yandex/${{ env.YC_REGISTRY_ID }}/frontend-next:${{ github.sha }} .
-          docker push cr.yandex/${{ env.YC_REGISTRY_ID }}/frontend-next:${{ github.sha }}
+      - name: Build and push Frontend for AMD64
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend-next
+          platforms: linux/amd64
+          push: true
+          tags: |
+            cr.yandex/${{ env.YC_REGISTRY_ID }}/frontend-next:${{ github.sha }}
+            cr.yandex/${{ env.YC_REGISTRY_ID }}/frontend-next:latest
 
   deploy-to-k8s:
     runs-on: ubuntu-latest
@@ -91,4 +71,5 @@ jobs:
       - name: Verify deployment
         run: |
           echo "🎉 CI/CD Pipeline Completed!"
-          echo "🚀 Applications deployed successfully"
+          echo "📦 AMD64 images pushed to Yandex Container Registry"
+          echo "🚀 Applications deployed to Kubernetes"
