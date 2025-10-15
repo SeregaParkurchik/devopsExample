@@ -8,7 +8,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ${{ github.repository_owner }}
 
 jobs:
   test-backend-go:
@@ -76,14 +75,14 @@ jobs:
         with:
           context: ./backend-go
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/backend-go:latest
+          tags: ${{ env.REGISTRY }}/seregaparkurchik/backend-go:latest
 
       - name: Build and push Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend-next
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository_owner | lower }}/frontend-next:latest
+          tags: ${{ env.REGISTRY }}/seregaparkurchik/frontend-next:latest
 
   deploy-notification:
     runs-on: ubuntu-latest
